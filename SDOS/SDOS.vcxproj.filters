@@ -744,12 +744,6 @@
     <ClCompile Include="RED.cpp">
       <Filter>Source files\Engines</Filter>
     </ClCompile>
-    <ClCompile Include="EString.cpp">
-      <Filter>Source files\User</Filter>
-    </ClCompile>
-    <ClCompile Include="EMath.cpp">
-      <Filter>Source files\User</Filter>
-    </ClCompile>
     <ClCompile Include="Accelerometer.cpp">
       <Filter>Source files\User</Filter>
     </ClCompile>
@@ -774,8 +768,20 @@
     <ClCompile Include="DMA.cpp">
       <Filter>Source files\Peripherals</Filter>
     </ClCompile>
-    <ClCompile Include="Flash.cpp">
+    <ClCompile Include="Math.cpp">
+      <Filter>Source files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="String.cpp">
+      <Filter>Source files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtMem.cpp">
       <Filter>Source files\User</Filter>
+    </ClCompile>
+    <ClCompile Include="FPU.cpp">
+      <Filter>Source files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="FPU_asm.S">
+      <Filter>Source files\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -833,12 +839,6 @@
     <ClInclude Include="RED.hpp">
       <Filter>Header files\Engines</Filter>
     </ClInclude>
-    <ClInclude Include="EString.hpp">
-      <Filter>Header files\User</Filter>
-    </ClInclude>
-    <ClInclude Include="EMath.hpp">
-      <Filter>Header files\User</Filter>
-    </ClInclude>
     <ClInclude Include="Accelerometer.hpp">
       <Filter>Header files\User</Filter>
     </ClInclude>
@@ -863,8 +863,20 @@
     <ClInclude Include="DMA.hpp">
       <Filter>Header files\Peripherals</Filter>
     </ClInclude>
-    <ClInclude Include="Flash.hpp">
+    <ClInclude Include="Math.hpp">
+      <Filter>Header files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="String.hpp">
+      <Filter>Header files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtMem.hpp">
       <Filter>Header files\User</Filter>
+    </ClInclude>
+    <ClInclude Include="LOW.hpp">
+      <Filter>Header files\Engines</Filter>
+    </ClInclude>
+    <ClInclude Include="FPU.hpp">
+      <Filter>Header files\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
