@@ -1,0 +1,120 @@
+.data
+test: .word 0
+
+.thumb
+.syntax unified
+.section .text, "ax"
+.balign 4
+.eabi_attribute Tag_ABI_align_preserved, 1
+
+.global FPU_ENABLE
+.global FPU_DISABLE
+.global FPU_SQRT
+.global FPU_MUL
+.global FPU_DIV
+.global FPU_ADD
+.global FPU_SUB
+.global FPU_ABS
+.global FPU_CMP
+.global FPU_CVT_TO_INT
+.global FPU_CVT_TO_INT_R
+.global FPU_CVT_TO_FLT
+.global FPU_NEG
+
+FPU_ENABLE:
+	LDR R0, =0xE000ED88			@CPACR
+	LDR R1, [R0]
+	ORR R1, R1, #0x00F00000		@CP10 and CP11 enabled
+	STR R1, [R0]
+	BX LR
+
+FPU_DISABLE:
+	LDR R0, =0xE000ED88			@CPACR
+	LDR R1, [R0]
+	AND R1, R1, #0xFF0FFFFF		@CP10 and CP11 disabled
+	STR R1, [R0]
+	BX LR
+
+FPU_SQRT:
+	VMOV.32 S0, R0
+	VSQRT.F32 S0, S0
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_MUL:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VMUL.F32 S0, S0, S1
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_DIV:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VDIV.F32 S0, S0, S1
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_ADD:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VADD.F32 S0, S0, S1
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_SUB:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VNEG.F32 S1, S1				@No subtraction instruction so negate then add
+	VADD.F32 S0, S0, S1
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_ABS:
+	VMOV.32 S0, R0
+	VABS.F32 S0, S0
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_CMP:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VCMP.F32 S0, S1
+	VMRS APSR_nzcv, fpscr		@Move NZCV flags from FPU to CPU
+	ITT EQ
+	MOVEQ R0, #0
+	BXEQ LR						@Skip below cycles
+	ITT GT
+	MOVGT R0, #1
+	BXGT LR						@Skip below cycles
+	IT LT
+	MOVLT R0, #2
+	BX LR						@Guaranteed exit
+
+FPU_CVT_TO_INT:					@Signed only, dont care about unsigned
+	VMOV.32 S0, R0
+	VCVT.S32.F32 S0, S0
+	VMOV R0, S0
+	BX LR
+
+FPU_CVT_TO_INT_R:
+	VMOV.32 S0, R0
+	VCVTR.S32.F32 S0, S0
+	VMOV R0, S0
+	BX LR
+
+FPU_CVT_TO_FLT:
+	VMOV.32 S0, R0
+	VCVT.F32.S32 S0, S0
+	VMOV R0, S0
+	BX LR
+
+FPU_NEG:
+	VMOV.32 S0, R0
+	VNEG.F32 S0, S0
+	VMOV R0, S0
+	BX LR
+
+.align
+.end
+

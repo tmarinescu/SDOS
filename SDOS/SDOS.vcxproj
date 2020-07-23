@@ -50,6 +50,14 @@
       <AdditionalLibraryNames>;%(Link.AdditionalLibraryNames)</AdditionalLibraryNames>
       <LinkerScript>STM32G431KB_flash.lds</LinkerScript>
     </Link>
+    <ToolchainSettingsContainer>
+      <FloatABI>
+      </FloatABI>
+    </ToolchainSettingsContainer>
+    <ToolchainSettingsContainer>
+      <ARMFPU>
+      </ARMFPU>
+    </ToolchainSettingsContainer>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
     <ClCompile>
@@ -71,14 +79,16 @@
     <ClCompile Include="Critical.cpp" />
     <ClCompile Include="DMA.cpp" />
     <ClCompile Include="Encoder.cpp" />
-    <ClCompile Include="EString.cpp" />
-    <ClCompile Include="Flash.cpp" />
+    <ClCompile Include="FPU.cpp" />
+    <ClCompile Include="FPU_asm.S" />
+    <ClCompile Include="String.cpp" />
+    <ClCompile Include="ExtMem.cpp" />
     <ClCompile Include="GPIO.cpp" />
     <ClCompile Include="Gyroscope.cpp" />
     <ClCompile Include="I2C.cpp" />
     <ClCompile Include="Interrupts.cpp" />
     <ClCompile Include="kernel.S" />
-    <ClCompile Include="EMath.cpp" />
+    <ClCompile Include="Math.cpp" />
     <ClCompile Include="MicroScript.cpp" />
     <ClCompile Include="Motor.cpp" />
     <ClCompile Include="Mutex.cpp" />
@@ -102,13 +112,15 @@
     <ClInclude Include="Critical.hpp" />
     <ClInclude Include="DMA.hpp" />
     <ClInclude Include="Encoder.hpp" />
-    <ClInclude Include="EString.hpp" />
-    <ClInclude Include="Flash.hpp" />
+    <ClInclude Include="FPU.hpp" />
+    <ClInclude Include="LOW.hpp" />
+    <ClInclude Include="String.hpp" />
+    <ClInclude Include="ExtMem.hpp" />
     <ClInclude Include="GPIO.hpp" />
     <ClInclude Include="Gyroscope.hpp" />
     <ClInclude Include="I2C.hpp" />
     <ClInclude Include="Interrupts.hpp" />
-    <ClInclude Include="EMath.hpp" />
+    <ClInclude Include="Math.hpp" />
     <ClInclude Include="MicroScript.hpp" />
     <ClInclude Include="Motor.hpp" />
     <ClInclude Include="Mutex.hpp" />

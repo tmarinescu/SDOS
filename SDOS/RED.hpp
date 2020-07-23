@@ -42,4 +42,4 @@ private:
 	static uint32_t _temp;
 };
 
-#endif
+#endif
