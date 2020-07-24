@@ -185,6 +185,7 @@ GPIOData* GPIOData::SetHigh()
 
 GPIOData* GPIOData::Toggle()
 {
+	//MANUAL: Fast toggle capable of changing every two clock cycles
 	if (_init)
 	{
 		if (Utilities::GetRegisterSingle(&_gpio->ODR, _pin))
@@ -342,6 +343,23 @@ GPIOData* GPIOData::Update()
 	}
 	
 	_init = true;
+	return this;
+}
+
+GPIOData* GPIOData::Lock()
+{
+	//Lock sequence as described in manual
+	Utilities::SetRegisterMultiple(&_gpio->LCKR, 16, 1, _pin, 1);	//WR LCKR[16] = '1' + LCKR[15:0]
+	Utilities::SetRegisterMultiple(&_gpio->LCKR, 16, 0, _pin, 1);	//WR LCKR[16] = '0' + LCKR[15:0]
+	Utilities::SetRegisterMultiple(&_gpio->LCKR, 16, 1, _pin, 1);	//WR LCKR[16] = '1' + LCKR[15:0]
+	volatile uint32_t tmp = _gpio->LCKR; 							//RD LCKR
+	//Utilities::GetRegisterSingle(&_gpio->LCKR, 16);				//RD LCKR[16] = '1' (this read operation is optional but it confirms that the lock is active)
+	/*
+	 Note: During the LOCK key write sequence, the value of LCK[15:0] must not change.
+			Any error in the lock sequence aborts the lock.
+			After the first lock sequence on any bit of the port, any read access on the LCKK bit
+			returns '1' until the next MCU reset or peripheral reset.
+	 */
 	return this;
 }
 

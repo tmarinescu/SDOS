@@ -1,3 +1,5 @@
+//Still missing interrupt and EXTI handling
+
 #ifndef _GPIO_H_
 #define _GPIO_H_
 
@@ -81,6 +83,7 @@ public:
 	GPIOData* SetHigh();
 	GPIOData* Toggle();
 	GPIOData* Update();
+	GPIOData* Lock();
 	
 	GPIOData(uint32_t pin, char group);
 private:
