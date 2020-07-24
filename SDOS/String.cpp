@@ -1,7 +1,7 @@
 #include "String.hpp"
 #include <stdio.h> 
 #include <ctype.h>
-	
+
 String::String(const uint8_t* str)
 {
 	Clear();

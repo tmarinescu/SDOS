@@ -13,4 +13,4 @@ public:
 	static void SignalWait(int32_t *semaphore);
 };
 
-#endif
+#endif

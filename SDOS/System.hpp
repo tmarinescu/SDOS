@@ -31,25 +31,25 @@
 #define G4_RAMP_DOWN_SPEED	2		//2 milliseconds gradual ramp down
 #define G4_THERMAL_LIMIT	65		//Maintaing temp around 65 by downclocking
 
+enum CPUClock
+{
+	FREQ_8MHZ	= 0,
+	FREQ_16MHZ	= 1,
+	FREQ_36MHZ	= 2,
+	FREQ_72MHZ	= 3, 	//F3 max
+	FREQ_144MHZ = 4,
+	FREQ_170MHZ = 5, 	//G4 max
+	FREQ_200MHZ = 6,
+	FREQ_216MHZ	= 7, 	//F7 max
+	FREQ_250MHZ	= 8,
+	FREQ_285MHZ	= 9,
+};
+
 class System
 {
 public:
-	enum SystemFrequency
-	{
-		FREQ_8MHZ	= 0,
-		FREQ_16MHZ	= 1,
-		FREQ_36MHZ	= 2,
-		FREQ_72MHZ	= 3,	//F3 max
-		FREQ_144MHZ = 4,
-		FREQ_170MHZ = 5,	//G4 max
-		FREQ_200MHZ = 6,
-		FREQ_216MHZ	= 7,	//F7 max
-		FREQ_250MHZ	= 8,
-		FREQ_285MHZ	= 9,
-	};
-
-	static bool SetFrequency(SystemFrequency freq);
-	static SystemFrequency GetFrequency(void);
+	static bool SetFrequency(CPUClock freq);
+	static CPUClock GetFrequency(void);
 	static bool DisableFrequencyManager(void);
 	static bool EnableFrequencyManager(void);
 	static bool FrequencyManagerEnabled(void);
@@ -62,7 +62,7 @@ public:
 	
 private:
 	static bool _frequencyManagerEnabled;
-	static SystemFrequency _currentSetFrequency;
+	static CPUClock _currentSetFrequency;
 	static uint32_t _currentFrequency;
 	static void (*_bootFunction)(void);
 };
