@@ -22,7 +22,7 @@ int main(void)
 	FPUnit::SelfTest();
 	HAL_Init();
 
-	GPIOBase::Get(8, 'B')->Mode(GPIOMode::OUTPUT_PUSHPULL)->Speed(GPIOSpeed::HIGH)->Pull(GPIOPull::NOPULL)->Update()->SetLow();
+	GPIOBase::Get(8, 'B')->Mode(GPIOMode::OUTPUT_PUSHPULL)->Speed(GPIOSpeed::HIGH)->Pull(GPIOPull::NOPULL)->Update()->Lock()->SetLow();
 	__NOP();
 	for (;;)
 	{
