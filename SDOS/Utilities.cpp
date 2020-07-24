@@ -23,6 +23,12 @@ void Utilities::SetRegisterMultiple(volatile uint32_t* reg, uint32_t index1, boo
 	*reg |= tmp;
 }
 
+void Utilities::SetRegisterMultipleMono(volatile uint32_t* reg, uint32_t index1, bool bit1, uint32_t index2, bool bit2)
+{
+	uint32_t tmp = ((1UL * bit1) << index1) | ((1UL * bit2) << index2);
+	*reg = tmp;
+}
+
 void Utilities::SetRegisterSingle(volatile uint32_t* reg, uint32_t index, bool bit)
 {
 	if (bit)
