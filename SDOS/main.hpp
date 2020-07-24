@@ -9,6 +9,8 @@
 
 /*Extern function shorthands*/
 #define cvoid extern "C" void
+#define cfloat extern "C" float
+#define cuint32_t extern "C" uint32_t
 
 /*Platforms Supported*/
 #define PLATFORM_G4

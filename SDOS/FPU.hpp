@@ -5,22 +5,19 @@
 
 #include "main.hpp"
 
-extern "C"
-{
-	extern float FPU_SQRT(float arg);
-	extern void FPU_ENABLE(void);
-	extern void FPU_DISABLE(void);
-	extern float FPU_MUL(float arg1, float arg2);
-	extern float FPU_DIV(float arg1, float arg2);
-	extern float FPU_ADD(float arg1, float arg2);
-	extern float FPU_SUB(float arg1, float arg2);
-	extern float FPU_ABS(float arg1);
-	extern uint32_t FPU_CMP(float arg1, float arg2);
-	extern uint32_t FPU_CVT_TO_INT(float arg);
-	extern uint32_t FPU_CVT_TO_INT_R(float arg);
-	extern float FPU_CVT_TO_FLT(uint32_t arg);
-	extern float FPU_NEG(float arg1);
-}
+cfloat FPU_SQRT(float arg);
+cvoid FPU_ENABLE(void);
+cvoid FPU_DISABLE(void);
+cfloat FPU_MUL(float arg1, float arg2);
+cfloat FPU_DIV(float arg1, float arg2);
+cfloat FPU_ADD(float arg1, float arg2);
+cfloat FPU_SUB(float arg1, float arg2);
+cfloat FPU_ABS(float arg1);
+cuint32_t FPU_CMP(float arg1, float arg2);
+cuint32_t FPU_CVT_TO_INT(float arg);
+cuint32_t FPU_CVT_TO_INT_R(float arg);
+cfloat FPU_CVT_TO_FLT(uint32_t arg);
+cfloat FPU_NEG(float arg1);
 
 class FPUnit
 {
