@@ -30,6 +30,7 @@ int main(void)
 		HAL_Delay(500);
 		GPIOBase::Get(8, 'B')->SetLow();
 		HAL_Delay(500);
+		GPIOBase::Get(8, 'B')->Mode(GPIOMode::INPUT)->Speed(GPIOSpeed::LOW)->Pull(GPIOPull::PULLDOWN)->Update();
 		x = FPUnit::Sqrt(y);
 		z = FPUnit::Mul(x, y);
 		__NOP();

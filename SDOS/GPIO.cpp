@@ -349,9 +349,9 @@ GPIOData* GPIOData::Update()
 GPIOData* GPIOData::Lock()
 {
 	//Lock sequence as described in manual
-	Utilities::SetRegisterMultiple(&_gpio->LCKR, 16, 1, _pin, 1);	//WR LCKR[16] = '1' + LCKR[15:0]
-	Utilities::SetRegisterMultiple(&_gpio->LCKR, 16, 0, _pin, 1);	//WR LCKR[16] = '0' + LCKR[15:0]
-	Utilities::SetRegisterMultiple(&_gpio->LCKR, 16, 1, _pin, 1);	//WR LCKR[16] = '1' + LCKR[15:0]
+	Utilities::SetRegisterMultipleMono(&_gpio->LCKR, 16, 1, _pin, 1);	//WR LCKR[16] = '1' + LCKR[15:0]
+	Utilities::SetRegisterMultipleMono(&_gpio->LCKR, 16, 0, _pin, 1); 	//WR LCKR[16] = '0' + LCKR[15:0]
+	Utilities::SetRegisterMultipleMono(&_gpio->LCKR, 16, 1, _pin, 1); 	//WR LCKR[16] = '1' + LCKR[15:0]
 	volatile uint32_t tmp = _gpio->LCKR; 							//RD LCKR
 	//Utilities::GetRegisterSingle(&_gpio->LCKR, 16);				//RD LCKR[16] = '1' (this read operation is optional but it confirms that the lock is active)
 	/*
