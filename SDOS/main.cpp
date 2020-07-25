@@ -1,6 +1,8 @@
 #include "main.hpp"
 #include "FPU.hpp"
 #include "GPIO.hpp"
+#include "Math.hpp"
+#include "Float.hpp"
 
 cvoid SysTick_Handler(void)
 {
@@ -10,10 +12,9 @@ cvoid SysTick_Handler(void)
 
 extern "C"
 {
-	float x = 0.0f;
-	float y = 4124.51f;
-	float z = 0.0f;
-	uint32_t f = 0;
+	Float x = 0.5f;
+	Float y = 25.124f;
+	float z = 16.16f;
 }
 
 int main(void)
@@ -23,6 +24,7 @@ int main(void)
 	HAL_Init();
 
 	GPIOBase::Get(8, 'B')->Mode(GPIOMode::OUTPUT_PUSHPULL)->Speed(GPIOSpeed::HIGH)->Pull(GPIOPull::NOPULL)->Update()->Lock()->SetLow();
+	
 	__NOP();
 	for (;;)
 	{
@@ -31,13 +33,12 @@ int main(void)
 		GPIOBase::Get(8, 'B')->SetLow();
 		HAL_Delay(500);
 		GPIOBase::Get(8, 'B')->Mode(GPIOMode::INPUT)->Speed(GPIOSpeed::LOW)->Pull(GPIOPull::PULLDOWN)->Update();
-		x = FPUnit::Sqrt(y);
-		z = FPUnit::Mul(x, y);
-		__NOP();
-		f = FPUnit::Compare(0.126f, 0.127f);
-		__NOP();
-		x = FPUnit::ToFloat(5512);
-		f = FPUnit::ToInt32(5222.51521f, true);
+		
+		x = z;
+		x += z;
+		y = x;
+		y = Math::Sqrt(y);
+
 		__NOP();
 	}
 }

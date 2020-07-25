@@ -126,6 +126,34 @@ float FPUnit::Add(float num1, float num2)
 	}
 }
 
+float FPUnit::Add(float num1, float num2, float num3)
+{
+	if (_enabled)
+	{
+		_lastError = 0;
+		return FPU_ADD3(num1, num2, num3);
+	}
+	else
+	{
+		_lastError = 7;
+		return 0.0f;
+	}
+}
+
+float FPUnit::Add(float num1, float num2, float num3, float num4)
+{
+	if (_enabled)
+	{
+		_lastError = 0;
+		return FPU_ADD4(num1, num2, num3, num4);
+	}
+	else
+	{
+		_lastError = 8;
+		return 0.0f;
+	}
+}
+
 float FPUnit::Sub(float num1, float num2)
 {
 	if (_enabled)
@@ -135,7 +163,35 @@ float FPUnit::Sub(float num1, float num2)
 	}
 	else
 	{
-		_lastError = 7;
+		_lastError = 9;
+		return 0.0f;
+	}
+}
+
+float FPUnit::Sub(float num1, float num2, float num3)
+{
+	if (_enabled)
+	{
+		_lastError = 0;
+		return FPU_SUB3(num1, num2, num3);
+	}
+	else
+	{
+		_lastError = 10;
+		return 0.0f;
+	}
+}
+
+float FPUnit::Sub(float num1, float num2, float num3, float num4)
+{
+	if (_enabled)
+	{
+		_lastError = 0;
+		return FPU_SUB4(num1, num2, num3, num4);
+	}
+	else
+	{
+		_lastError = 11;
 		return 0.0f;
 	}
 }
@@ -149,7 +205,7 @@ float FPUnit::Abs(float num)
 	}
 	else
 	{
-		_lastError = 8;
+		_lastError = 12;
 		return 0.0f;
 	}
 }
@@ -163,9 +219,34 @@ uint32_t FPUnit::Compare(float num1, float num2)
 	}
 	else
 	{
-		_lastError = 9;
+		_lastError = 13;
 		return 0;
 	}
+}
+
+bool FPUnit::LSGreaterRS(float num1, float num2)
+{
+	return Compare(num1, num2) == 1;
+}
+
+bool FPUnit::RSGreaterLS(float num1, float num2)
+{
+	return Compare(num1, num2) == 2;
+}
+
+bool FPUnit::Equal(float num1, float num2)
+{
+	return Compare(num1, num2) == 0;
+}
+
+bool FPUnit::LSGreaterEqualRS(float num1, float num2)
+{
+	return FPU_CMP_GE(num1, num2) == 0;
+}
+
+bool FPUnit::RSGreaterEqualLS(float num1, float num2)
+{
+	return FPU_CMP_LE(num1, num2) == 0;
 }
 
 float FPUnit::ToFloat(uint32_t num)
@@ -177,7 +258,7 @@ float FPUnit::ToFloat(uint32_t num)
 	}
 	else
 	{
-		_lastError = 10;
+		_lastError = 14;
 		return 0.0f;
 	}
 }
@@ -194,7 +275,7 @@ uint32_t FPUnit::ToInt32(float num, bool round)
 	}
 	else
 	{
-		_lastError = 11;
+		_lastError = 15;
 		return 0.0f;
 	}
 }
@@ -208,7 +289,7 @@ float FPUnit::Neg(float num)
 	}
 	else
 	{
-		_lastError = 12;
+		_lastError = 16;
 		return 0.0f;
 	}
 }

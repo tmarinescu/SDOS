@@ -13,9 +13,15 @@ test: .word 0
 .global FPU_MUL
 .global FPU_DIV
 .global FPU_ADD
+.global FPU_ADD3
+.global FPU_ADD4
 .global FPU_SUB
+.global FPU_SUB3
+.global FPU_SUB4
 .global FPU_ABS
 .global FPU_CMP
+.global FPU_CMP_GE
+.global FPU_CMP_LE
 .global FPU_CVT_TO_INT
 .global FPU_CVT_TO_INT_R
 .global FPU_CVT_TO_FLT
@@ -62,11 +68,56 @@ FPU_ADD:
 	VMOV.32 R0, S0
 	BX LR
 
+FPU_ADD3:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VMOV.32 S2, R2
+	VADD.F32 S0, S0, S1
+	VADD.F32 S0, S0, S2
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_ADD4:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VMOV.32 S2, R2
+	VMOV.32 S3, R3
+	VADD.F32 S0, S0, S1
+	VADD.F32 S0, S0, S2
+	VADD.F32 S0, S0, S3
+	VMOV.32 R0, S0
+	BX LR
+
 FPU_SUB:
 	VMOV.32 S0, R0
 	VMOV.32 S1, R1
 	VNEG.F32 S1, S1				@No subtraction instruction so negate then add
 	VADD.F32 S0, S0, S1
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_SUB3:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VMOV.32 S2, R2
+	VNEG.F32 S1, S1				@No subtraction instruction so negate then add
+	VADD.F32 S0, S0, S1
+	VNEG.F32 S2, S2
+	VADD.F32 S0, S0, S2
+	VMOV.32 R0, S0
+	BX LR
+
+FPU_SUB4:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VMOV.32 S2, R2
+	VMOV.32 S3, R3
+	VNEG.F32 S1, S1				@No subtraction instruction so negate then add
+	VADD.F32 S0, S0, S1
+	VNEG.F32 S2, S2
+	VADD.F32 S0, S0, S2
+	VNEG.F32 S3, S3
+	VADD.F32 S0, S0, S3
 	VMOV.32 R0, S0
 	BX LR
 
@@ -90,6 +141,28 @@ FPU_CMP:
 	IT LT
 	MOVLT R0, #2
 	BX LR						@Guaranteed exit
+
+FPU_CMP_GE:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VCMP.F32 S0, S1
+	VMRS APSR_nzcv, fpscr
+	ITT GE
+	MOVGE R0, #0
+	BXGE LR
+	MOV R0, #1
+	BX LR
+
+FPU_CMP_LE:
+	VMOV.32 S0, R0
+	VMOV.32 S1, R1
+	VCMP.F32 S0, S1
+	VMRS APSR_nzcv, fpscr
+	ITT LE
+	MOVLE R0, #0
+	BXLE LR
+	MOV R0, #1
+	BX LR
 
 FPU_CVT_TO_INT:					@Signed only, dont care about unsigned
 	VMOV.32 S0, R0

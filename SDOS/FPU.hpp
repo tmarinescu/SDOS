@@ -11,9 +11,15 @@ cvoid FPU_DISABLE(void);
 cfloat FPU_MUL(float arg1, float arg2);
 cfloat FPU_DIV(float arg1, float arg2);
 cfloat FPU_ADD(float arg1, float arg2);
+cfloat FPU_ADD3(float arg1, float arg2, float arg3);
+cfloat FPU_ADD4(float arg1, float arg2, float arg3, float arg4);
 cfloat FPU_SUB(float arg1, float arg2);
+cfloat FPU_SUB3(float arg1, float arg2, float arg3);
+cfloat FPU_SUB4(float arg1, float arg2, float arg3, float arg4);
 cfloat FPU_ABS(float arg1);
 cuint32_t FPU_CMP(float arg1, float arg2);
+cuint32_t FPU_CMP_GE(float arg1, float arg2);
+cuint32_t FPU_CMP_LE(float arg1, float arg2);
 cuint32_t FPU_CVT_TO_INT(float arg);
 cuint32_t FPU_CVT_TO_INT_R(float arg);
 cfloat FPU_CVT_TO_FLT(uint32_t arg);
@@ -28,12 +34,24 @@ public:
 	static float Sqrt(float num);
 	static float Mul(float num1, float num2);
 	static float Div(float num1, float num2);
+	
 	static float Add(float num1, float num2);
+	static float Add(float num1, float num2, float num3);
+	static float Add(float num1, float num2, float num3, float num4);
+	
 	static float Sub(float num1, float num2);
+	static float Sub(float num1, float num2, float num3);
+	static float Sub(float num1, float num2, float num3, float num4);
+	
 	static float Abs(float num);
 	static float ToFloat(uint32_t num);
 	static uint32_t ToInt32(float num, bool round = true);
 	static uint32_t Compare(float num1, float num2);  //0 = equal, 1 = num1 greater, 2 = num2 greater
+	static bool LSGreaterRS(float num1, float num2);
+	static bool RSGreaterLS(float num1, float num2);
+	static bool Equal(float num1, float num2);
+	static bool LSGreaterEqualRS(float num1, float num2);
+	static bool RSGreaterEqualLS(float num1, float num2);
 	static float Neg(float num);
 	static uint8_t GetError();
 	

@@ -79,6 +79,7 @@
     <ClCompile Include="Critical.cpp" />
     <ClCompile Include="DMA.cpp" />
     <ClCompile Include="Encoder.cpp" />
+    <ClCompile Include="Float.cpp" />
     <ClCompile Include="FPU.cpp" />
     <ClCompile Include="FPU_asm.S" />
     <ClCompile Include="String.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="Critical.hpp" />
     <ClInclude Include="DMA.hpp" />
     <ClInclude Include="Encoder.hpp" />
+    <ClInclude Include="Float.hpp" />
     <ClInclude Include="FPU.hpp" />
     <ClInclude Include="LOW.hpp" />
     <ClInclude Include="String.hpp" />
