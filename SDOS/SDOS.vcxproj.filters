@@ -783,6 +783,9 @@
     <ClCompile Include="FPU_asm.S">
       <Filter>Source files\System</Filter>
     </ClCompile>
+    <ClCompile Include="Float.cpp">
+      <Filter>Source files\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.hpp">
@@ -876,6 +879,9 @@
       <Filter>Header files\Engines</Filter>
     </ClInclude>
     <ClInclude Include="FPU.hpp">
+      <Filter>Header files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Float.hpp">
       <Filter>Header files\System</Filter>
     </ClInclude>
   </ItemGroup>
