@@ -60,6 +60,7 @@ public:
 	
 	static bool BindBootFunction(void(*func)(void));
 	
+	static void SetupSysTick(void);
 private:
 	static bool _frequencyManagerEnabled;
 	static CPUClock _currentSetFrequency;
@@ -67,4 +68,4 @@ private:
 	static void (*_bootFunction)(void);
 };
 
-#endif
+#endif

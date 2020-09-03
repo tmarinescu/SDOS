@@ -3,12 +3,8 @@
 #include "GPIO.hpp"
 #include "Math.hpp"
 #include "Float.hpp"
-
-cvoid SysTick_Handler(void)
-{
-	HAL_IncTick();
-	HAL_SYSTICK_IRQHandler();
-}
+#include "Scheduler.hpp"
+#include "System.hpp"
 
 extern "C"
 {
@@ -22,10 +18,12 @@ int main(void)
 	FPUnit::Enable();
 	FPUnit::SelfTest();
 	HAL_Init();
-
-	GPIOBase::Get(8, 'B')->Mode(GPIOMode::OUTPUT_PUSHPULL)->Speed(GPIOSpeed::HIGH)->Pull(GPIOPull::NOPULL)->Update()->Lock()->SetLow();
+	__disable_irq();
 	
-	__NOP();
+	System::SetupSysTick();
+	
+	GPIOBase::Get(8, 'B')->Mode(GPIOMode::OUTPUT_PUSHPULL)->Speed(GPIOSpeed::HIGH)->Pull(GPIOPull::NOPULL)->Update()->Lock()->SetLow();
+
 	for (;;)
 	{
 		GPIOBase::Get(8, 'B')->SetHigh();
