@@ -21,6 +21,10 @@
 /*Don't mess with*/
 #if defined(PLATFORM_G4) || defined(PLATFORM_F3) || defined(PLATFORM_F7) || defined(PLATFORM_L4)
 
+
+//SysTick
+#define SHPR3 (*((volatile uint32_t*)0xE000ED20))
+
 #else
 #error "PLATFORM IS NOT DEFINE IN main.hpp"
 #endif

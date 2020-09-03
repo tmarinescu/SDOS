@@ -56,4 +56,4 @@ private:
 	float _val;
 };
 
-#endif
+#endif

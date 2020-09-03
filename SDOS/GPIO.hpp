@@ -97,4 +97,4 @@ private:
 	GPIO_TypeDef* _gpio;
 };
 
-#endif
+#endif
