@@ -17,6 +17,7 @@ Implemented HAL APIs:
 Chip Utilized: **STM32G431KB**
 
 Previous Chip: **STM32F303K8**
+
 Tested Chips: 
  - **STM32F722ZE** (working, TCMRAM issues)
  - **STM32F303RE** (clone of STM32F303K8)
