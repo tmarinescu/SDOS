@@ -786,6 +786,9 @@
     <ClCompile Include="Float.cpp">
       <Filter>Source files\System</Filter>
     </ClCompile>
+    <ClCompile Include="Threads.cpp">
+      <Filter>Source files\Kernel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.hpp">
@@ -883,6 +886,9 @@
     </ClInclude>
     <ClInclude Include="Float.hpp">
       <Filter>Header files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Threads.hpp">
+      <Filter>Header files\Kernel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

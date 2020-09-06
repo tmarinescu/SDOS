@@ -177,6 +177,8 @@ public:
 	volatile uint32_t* Stack;
 	volatile Task* AttachedTask;
 	volatile bool Enabled;
+	volatile bool Initialized;
+	uint32_t Index;
 	Thread();
 	~Thread();
 };
@@ -184,11 +186,13 @@ public:
 class Scheduler
 {
 private:
-	static bool CriticalTaskActive;
-	uint32_t StackCapture[STACK_MAX_SIZE];
-	static Thread Threads[THREAD_NUM];
-	static Task Tasks[TASK_NUM];
-	static volatile uint32_t __attribute__((section(".ccmram"))) Stack[STACK_MAX_SIZE * THREAD_NUM];
+	static bool _criticalTaskActive;
+	static uint32_t _stackCapture[STACK_MAX_SIZE];
+	static Thread _threads[THREAD_NUM];
+	static Task _tasks[TASK_NUM];
+	static volatile uint32_t __attribute__((section(".ccmram"))) _stack[STACK_MAX_SIZE * THREAD_NUM];
+	static uint32_t _stackOffset;
+	static uint32_t _threadInitOffset;
 	
 public:
 	static void Update(void);
@@ -196,6 +200,8 @@ public:
 	static bool DisableThread(ThreadID thread);
 	static bool ResetThread(ThreadID thread);  //Wipes stack and ends active task
 	static bool IsThreadEnabled(ThreadID thread);
+	static Thread* GetThread(ThreadID thread);
+	static bool AssignThreadID(ThreadID thread, uint32_t threadNum, void(*volatile thrd)(ThreadID)); //AssignThreadID(Comms, 0, &Thread1);
 	static uint32_t GetActiveTask(ThreadID thread);
 	static ThreadID GetActiveThread(void);
 	static bool IsThreadIdle(ThreadID thread);
@@ -210,13 +216,13 @@ public:
 	
 	static bool IsValidID(uint32_t id);
 	
-	static bool SetStack(ThreadID thread, ThreadSize size);
+	static bool InitializeThread(ThreadID thread, ThreadSize size);
 	static bool Initialize(void);
 	
 	/*-Cool Territory- (aka useless but complicated things*/
 	
 	static ThreadID FindAvailableThread(uint32_t neededStack);  //Find a thread that can immediately execute a small task without dumping old stack or doing any extra work
-														//Potentially useful for extremely critical things that need literal immediate response times
+																//Potentially useful for extremely critical things that need literal immediate response times
 	
 	static uint32_t UsedStack(ThreadID thread);  //Returns size of how much stack is used at the moment
 	static bool SwapStack(ThreadID thread1, ThreadID thread2);  //Not sure if useful, ever, but cool idea
