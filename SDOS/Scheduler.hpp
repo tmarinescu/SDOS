@@ -79,6 +79,7 @@ class Task
 {
 public:
 	void(*volatile Function)(void);
+	bool Initialized;
 	bool Enabled;
 	bool Loop;
 	bool MemoryWarning;
@@ -99,7 +100,9 @@ class Thread
 {
 public:
 	volatile uint32_t* Stack;
-	volatile Task* AttachedTask;
+	volatile uint32_t StackMax;
+	volatile uint32_t StackMin;
+	Task* AttachedTask;
 	volatile bool Enabled;
 	volatile bool Initialized;
 	uint32_t Index;
@@ -112,13 +115,20 @@ class Scheduler
 private:
 	static bool _criticalTaskActive;
 	static uint32_t _stackCapture[STACK_MAX_SIZE];
+	static bool _capturedThread;
+	static ThreadID _capturedThreadID;
 	static Thread _threads[THREAD_NUM];
 	static Task _tasks[TASK_NUM];
 	static volatile uint32_t __attribute__((section(".ccmram"))) _stack[STACK_MAX_SIZE * THREAD_NUM];
 	static uint32_t _stackOffset;
 	static uint32_t _threadInitOffset;
+	static uint32_t _taskCount;
+	static volatile uint32_t _tick;
+	static volatile uint32_t _curThread;
+	static Thread* _activeThread;
 	
 public:
+	static uint32_t GetTick(void);
 	static void Update(void);
 	static bool EnableThread(ThreadID thread);
 	static bool DisableThread(ThreadID thread);
@@ -126,17 +136,18 @@ public:
 	static bool IsThreadEnabled(ThreadID thread);
 	static Thread* GetThread(ThreadID thread);
 	static bool AssignThreadID(ThreadID thread, uint32_t threadNum, void(*volatile thrd)(ThreadID)); //AssignThreadID(Comms, 0, &Thread1);
-	static uint32_t GetActiveTask(ThreadID thread);
-	static ThreadID GetActiveThread(void);
+	static Task* GetActiveTask(ThreadID thread);
 	static bool IsThreadIdle(ThreadID thread);
 	
-	static bool CreateTask(void(*volatile func)(void), PriorityLevel prio, uint32_t* ret_id);
-	static bool AddTask(uint32_t id, bool enabled, bool looped);
+	static uint32_t DetermineQuanta(PriorityLevel prio);
+	static uint32_t DetermineFrequency(PriorityLevel prio);
+	
+	static bool CreateTask(void(*volatile func)(void), PriorityLevel prio, uint32_t* ret_id, bool loop, uint32_t delayedStart);
 	static bool RemoveTask(uint32_t id);
 	static bool EnableTask(uint32_t id);
-	static void DisableTask(uint32_t id);
-	static void LoopTask(uint32_t id, uint32_t startDelay, uint32_t delay);
-	static void UnloopTask(uint32_t id);
+	static bool DisableTask(uint32_t id);
+	static bool LoopTask(uint32_t id, uint32_t startDelay, uint32_t delay);
+	static bool UnloopTask(uint32_t id);
 	
 	static bool IsValidID(uint32_t id);
 	
@@ -152,6 +163,7 @@ public:
 	static bool SwapStack(ThreadID thread1, ThreadID thread2);  //Not sure if useful, ever, but cool idea
 	
 	static bool CaptureThread(ThreadID thread);  //Backs up stack contents, only 1 thread at a time, might be useful for real-time thread analysis
+	static bool ReleaseThread(ThreadID thread);
 };
 
 #endif

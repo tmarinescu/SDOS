@@ -12,6 +12,11 @@ void Thread1(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -30,6 +35,11 @@ void Thread2(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -48,6 +58,11 @@ void Thread3(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -66,6 +81,11 @@ void Thread4(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -84,6 +104,11 @@ void Thread5(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -102,6 +127,11 @@ void Thread6(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -120,6 +150,11 @@ void Thread7(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}
@@ -138,6 +173,11 @@ void Thread8(ThreadID thread)
 				if (thrd->AttachedTask->Function != 0)
 				{
 					(*thrd->AttachedTask->Function)();
+					if (!thrd->AttachedTask->Loop)
+					{
+						thrd->AttachedTask->Initialized = false;
+					}
+					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
 			}
 		}

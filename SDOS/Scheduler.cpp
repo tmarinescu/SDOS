@@ -1,37 +1,83 @@
 #include  "Scheduler.hpp"
 #include "Threads.hpp"
+#include "Critical.hpp"
 
 ThreadID ThreadAssignments[THREAD_NUM];
 uint32_t ThreadAddresses[THREAD_NUM];
 
-void SDOS_Tick(void)
-{
-	
-}
-
-void SDOS_Setup(void)
-{
-	
-}
-
-void SDOS_Scheduler(void)
-{
-	
-}
-
-bool Scheduler::_criticalTaskActive = false;
-
+uint32_t Scheduler::_stackOffset = 0;
+uint32_t Scheduler::_threadInitOffset = 0;
+uint32_t Scheduler::_taskCount = 0;
+volatile uint32_t Scheduler::_tick = 0;
+volatile uint32_t Scheduler::_curThread = 0;
 uint32_t Scheduler::_stackCapture[STACK_MAX_SIZE];
 Thread Scheduler::_threads[THREAD_NUM];
 Task Scheduler::_tasks[TASK_NUM];
 
+bool Scheduler::_criticalTaskActive = false;
+bool Scheduler::_capturedThread = false;
+ThreadID Scheduler::_capturedThreadID = ThreadID::Invalid;
+Thread* Scheduler::_activeThread = 0;
+
 volatile uint32_t __attribute__((section(".ccmram"))) Scheduler::_stack[STACK_MAX_SIZE * THREAD_NUM];
 
-uint32_t Scheduler::_stackOffset = 0;
-uint32_t Scheduler::_threadInitOffset = 0;
-void Scheduler::Update(void)
+extern "C"
+{
+	volatile uint32_t **StackPtr;
+	void SDOS_Tick(void)
+	{
+		HAL_IncTick();
+	}
+
+	void SDOS_Scheduler(void)
+	{
+		Scheduler::Update();
+	}
+}
+
+Thread::Thread()
 {
 	
+}
+
+Thread::~Thread()
+{
+	
+}
+
+Task::Task()
+{
+	
+}
+
+Task::~Task()
+{
+	
+}
+
+uint32_t Scheduler::GetTick(void)
+{
+	return _tick;
+}
+
+void Scheduler::Update(void)
+{
+	uint32_t prim = Critical::DisableAllInterrupts();
+	_curThread++;
+	if (_curThread >= THREAD_NUM)
+		_curThread = 0;
+	
+	while (!_threads[_curThread].Enabled)
+	{
+		//Deadlock warning
+		_curThread++;
+		if (_curThread >= THREAD_NUM)
+			_curThread = 0;
+	}
+	
+	StackPtr = &_threads[_curThread].Stack;
+	_tick++;
+	Critical::EnableAllInterrupts(prim);
 }
 
 bool Scheduler::EnableThread(ThreadID thread)
@@ -73,14 +119,16 @@ bool Scheduler::AssignThreadID(ThreadID thread, uint32_t threadNum, void(*volati
 	return true;
 }
 
-uint32_t Scheduler::GetActiveTask(ThreadID thread)
+Task* Scheduler::GetActiveTask(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+		return 0;
 	
-}
-
-ThreadID Scheduler::GetActiveThread(void)
-{
+	if (!thrd->Initialized)
+		return 0;
 	
+	return thrd->AttachedTask;
 }
 
 bool Scheduler::IsThreadIdle(ThreadID thread)
@@ -88,46 +136,196 @@ bool Scheduler::IsThreadIdle(ThreadID thread)
 	
 }
 
-	
-bool Scheduler::CreateTask(void(*volatile func)(void), PriorityLevel prio, uint32_t* ret_id)
+uint32_t Scheduler::DetermineFrequency(PriorityLevel prio)
 {
-	
+	if (prio == PriorityLevel::SuperLow)
+	{
+		return SUPERLOW_FREQ;
+	}
+	else if (prio == PriorityLevel::Low)
+	{
+		return LOW_FREQ;
+	}
+	else if (prio == PriorityLevel::Medium)
+	{
+		return MEDIUM_FREQ;
+	}
+	else if (prio == PriorityLevel::High)
+	{
+		return HIGH_FREQ;
+	}
+	else
+	{
+		return CRITICAL_FREQ;
+	}
 }
 
-bool Scheduler::AddTask(uint32_t id, bool enabled, bool looped)
+uint32_t Scheduler::DetermineQuanta(PriorityLevel prio)
 {
+	if (prio == PriorityLevel::SuperLow)
+	{
+		if (_criticalTaskActive)
+		{
+			return SUPERLOW_QUANTA_CRIT;
+		}
+		else
+		{
+			return SUPERLOW_QUANTA_NORM;
+		}
+	}
+	else if (prio == PriorityLevel::Low)
+	{
+		if (_criticalTaskActive)
+		{
+			return LOW_QUANTA_CRIT;
+		}
+		else
+		{
+			return LOW_QUANTA_NORM;
+		}
+	}
+	else if (prio == PriorityLevel::Medium)
+	{
+		if (_criticalTaskActive)
+		{
+			return MEDIUM_QUANTA_CRIT;
+		}
+		else
+		{
+			return MEDIUM_QUANTA_NORM;
+		}
+	}
+	else if (prio == PriorityLevel::High)
+	{
+		if (_criticalTaskActive)
+		{
+			return HIGH_QUANTA_CRIT;
+		}
+		else
+		{
+			return HIGH_QUANTA_NORM;
+		}
+	}
+	else
+	{
+		return CRITICAL_QUANTA;
+	}
+}
 	
+bool Scheduler::CreateTask(void(*volatile func)(void), PriorityLevel prio, uint32_t* ret_id, bool loop = false, uint32_t delayedStart = 0)
+{
+	uint32_t prim = Critical::DisableAllInterrupts();
+	uint32_t indx = 0;
+	for (indx = 0; indx < TASK_NUM; indx++)
+	{
+		if (_tasks[indx].Initialized)
+		{
+			continue;
+		}
+		else
+		{
+			_tasks[indx].Initialized = true;
+			_tasks[indx].Blacklisted = false;
+			_tasks[indx].Enabled = false;
+			_tasks[indx].ExecuteTime = delayedStart;
+			_tasks[indx].Function = func;
+			_tasks[indx].LastError = TaskError::None;
+			_tasks[indx].LastExecute = GetTick();
+			_tasks[indx].Loop = loop;
+			_tasks[indx].MemoryWarning = false;
+			_tasks[indx].NextExecute = delayedStart + GetTick();
+			_tasks[indx].Priority = prio;
+			_tasks[indx].Quanta = 0;   //Determined within scheduler update
+			_tasks[indx].ReturnCode = 0;
+	
+			_taskCount++;
+			*ret_id = indx;
+			Critical::EnableAllInterrupts(prim);
+			return true;
+		}
+	}
+	
+	ret_id = 0;
+	Critical::EnableAllInterrupts(prim);
+	return false;
 }
 
 bool Scheduler::RemoveTask(uint32_t id)
 {
+	if (id >= TASK_NUM)
+		return false;
 	
+	_tasks[id].Initialized = false;
+	return true;
 }
 
 bool Scheduler::EnableTask(uint32_t id)
 {
+	if (id >= TASK_NUM)
+		return false;
 	
+	if (!_tasks[id].Initialized)
+		return false;
+	
+	if (_tasks[id].Enabled)
+		return false;
+	
+	_tasks[id].Enabled = true;
+	return true;
 }
 
-void Scheduler::DisableTask(uint32_t id)
+bool Scheduler::DisableTask(uint32_t id)
 {
+	if (id >= TASK_NUM)
+		return false;
 	
+	if (!_tasks[id].Initialized)
+		return false;
+	
+	if (!_tasks[id].Enabled)
+		return false;
+	
+	_tasks[id].Enabled = false;
+	return true;
 }
 
-void Scheduler::LoopTask(uint32_t id, uint32_t startDelay, uint32_t delay)
+bool Scheduler::LoopTask(uint32_t id, uint32_t startDelay, uint32_t delay)
 {
+	if (id >= TASK_NUM)
+		return false;
 	
+	if (!_tasks[id].Initialized)
+		return false;
+	
+	if (_tasks[id].Loop)
+		return false;
+	
+	_tasks[id].Loop = true;
+	return true;
 }
 
-void Scheduler::UnloopTask(uint32_t id)
+bool Scheduler::UnloopTask(uint32_t id)
 {
+	if (id >= TASK_NUM)
+		return false;
 	
+	if (!_tasks[id].Initialized)
+		return false;
+	
+	if (!_tasks[id].Loop)
+		return false;
+	
+	_tasks[id].Loop = false;
+	return true;
 }
 
 	
 bool Scheduler::IsValidID(uint32_t id)
 {
+	if (id >= TASK_NUM)
+		return false;
 	
+	return _tasks[id].Initialized;
 }
 
 	
@@ -145,8 +343,9 @@ bool Scheduler::InitializeThread(ThreadID thread, ThreadSize size)
 		_stack[i] = 0;
 	}
 	
-	_stack[_stackOffset + size - 2] = ThreadAddresses[thrd->Index];
-	
+	thrd->StackMin = _stackOffset;
+	thrd->StackMax = _stackOffset + size;
+	_stack[_stackOffset + size - 2] = ThreadAddresses[thrd->Index]; //PC
 	thrd->Stack = &_stack[_stackOffset + size - 16]; //Set index to SP
 	_stack[_stackOffset + size - 1] = 0x01000000; //xPSR
 	
@@ -164,6 +363,8 @@ bool Scheduler::Initialize(void)
 	_criticalTaskActive = false;
 	_stackOffset = 0;
 	_threadInitOffset = 0;
+	_capturedThread = false;
+	_capturedThreadID = ThreadID::Invalid;
 	
 	for (uint32_t i = 0; i < STACK_MAX_SIZE * THREAD_NUM; i++)
 	{
@@ -181,12 +382,15 @@ bool Scheduler::Initialize(void)
 		_threads[i].Stack = 0;
 		_threads[i].Initialized = false;
 		_threads[i].Index = i;
+		_threads[i].StackMax = 0;
+		_threads[i].StackMin = 0;
 		ThreadAssignments[i] = ThreadID::Invalid;
 		ThreadAddresses[i] = 0;
 	}
 	
 	for (uint32_t i = 0; i < TASK_NUM; i++)
 	{
+		_tasks[i].Initialized = false;
 		_tasks[i].AttachedThread = ThreadID::Invalid;
 		_tasks[i].Blacklisted = false;
 		_tasks[i].Enabled = false;
@@ -207,22 +411,128 @@ bool Scheduler::Initialize(void)
 	
 ThreadID Scheduler::FindAvailableThread(uint32_t neededStack)
 {
+	for (uint32_t i = 0; i < THREAD_NUM; i++)
+	{
+		if (_threads[i].Initialized)
+		{
+			if (*_threads[i].Stack + neededStack < _threads[i].StackMax)
+				return (ThreadID)i;
+		}
+	}
 	
+	return ThreadID::Invalid;
 }
 
 	
 uint32_t Scheduler::UsedStack(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd != 0)
+	{
+		if (thrd->Initialized)
+		{
+			return *thrd->Stack - thrd->StackMin;
+		}
+	}
 	
+	return 0;
 }
 
 bool Scheduler::SwapStack(ThreadID thread1, ThreadID thread2)
 {
+	uint32_t prim = Critical::DisableAllInterrupts();
 	
+	Thread* thrd1 = GetThread(thread1);
+	if (thrd1 == 0)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	if (!thrd1->Initialized)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	
+	Thread* thrd2 = GetThread(thread2);
+	if (thrd2 == 0)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	if (!thrd2->Initialized)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	
+	volatile uint32_t* temp = thrd1->Stack;
+	thrd1->Stack = thrd2->Stack;
+	thrd2->Stack = temp;
+	
+	Critical::EnableAllInterrupts(prim);
+	return true;
 }
 
 	
 bool Scheduler::CaptureThread(ThreadID thread)
 {
+	uint32_t prim = Critical::DisableAllInterrupts();
+	if (_capturedThread)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
 	
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	if (!thrd->Initialized)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	
+	uint32_t j = 0;
+	for (uint32_t i = thrd->StackMin; i < thrd->StackMax; i++)
+	{
+		_stackCapture[j] = _stack[i];
+		j++;
+	}
+	
+	_capturedThread = true;
+	_capturedThreadID = thread;
+	Critical::EnableAllInterrupts(prim);
+	return true;
+}
+
+bool Scheduler::ReleaseThread(ThreadID thread)
+{
+	uint32_t prim = Critical::DisableAllInterrupts();
+	
+	if (!_capturedThread)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	
+	if (thread != _capturedThreadID)
+	{
+		Critical::EnableAllInterrupts(prim);
+		return false;
+	}
+	
+	for (uint32_t i = 0; i < STACK_MAX_SIZE; i++)
+	{
+		_stackCapture[i] = 0;
+	}
+	
+	_capturedThread = false;
+	_capturedThreadID = ThreadID::Invalid;
+	
+	Critical::EnableAllInterrupts(prim);
+	return false;
 }
