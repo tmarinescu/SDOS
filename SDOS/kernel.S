@@ -11,7 +11,7 @@ orgStack: .word 0
 .global SDOS_Tick
 .global SysTick_Handler
 .global SDOS_Setup
-.extern SDOS_StackPtr
+.extern StackPtr
 
 .thumb_func
 SysTick_Handler:		@R0-R3, R12, LR, PC, xPSR already pushed by interrupt
@@ -19,7 +19,7 @@ SysTick_Handler:		@R0-R3, R12, LR, PC, xPSR already pushed by interrupt
 
 	PUSH {R4-R11}		@Store unsaved registers
 
-	LDR R0, =SDOS_StackPtr
+	LDR R0, =StackPtr
 	LDR R1, [R0]
 	STR SP, [R1]		@Store current stack location
 
@@ -33,7 +33,7 @@ SysTick_Handler:		@R0-R3, R12, LR, PC, xPSR already pushed by interrupt
 	
 	POP {R0, LR}		@Get back the pointer
 
-	LDR R1, [R0]		@SDOS_StackPtr pointer changed inside scheduler
+	LDR R1, [R0]		@StackPtr pointer changed inside scheduler
 	LDR SP, [R1]		@Restore stack 
 
 	POP {R4-R11}		@Restore registers
@@ -47,7 +47,7 @@ SDOS_Setup:
 	LDR R0, =orgStack
 	STR SP, [R0]			@Store the original stack
 
-	LDR R0, =SDOS_StackPtr	@Double pointer
+	LDR R0, =StackPtr	@Double pointer
 	LDR R1, [R0]
 	LDR SP, [R1]			@Switch stack to the thread one
 
