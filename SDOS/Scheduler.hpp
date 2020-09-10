@@ -3,7 +3,7 @@
 
 #include "main.hpp"
 
-#define STACK_MAX_SIZE 128
+#define STACK_MAX_SIZE 256
 #define THREAD_NUM 8
 #define TASK_NUM 256
 
@@ -78,7 +78,7 @@ enum PriorityLevel
 class Task
 {
 public:
-	void(*volatile Function)(void);
+	int32_t (*volatile Function)(void);
 	bool Initialized;
 	bool Enabled;
 	bool Loop;
@@ -91,7 +91,8 @@ public:
 	ThreadID AttachedThread;
 	TaskError LastError;
 	uint32_t Quanta;
-	int32_t ReturnCode;
+	uint32_t QuantaMax;
+	void(*volatile ReturnHandler)(int32_t ret);
 	Task();
 	~Task();
 };
@@ -142,7 +143,7 @@ public:
 	static uint32_t DetermineQuanta(PriorityLevel prio);
 	static uint32_t DetermineFrequency(PriorityLevel prio);
 	
-	static bool CreateTask(void(*volatile func)(void), PriorityLevel prio, uint32_t* ret_id, bool loop, uint32_t delayedStart);
+	static bool CreateTask(int32_t(*volatile func)(void), void(*volatile retHandler)(int32_t), PriorityLevel prio, uint32_t* ret_id, bool loop = false, uint32_t delayedStart = 0);
 	static bool RemoveTask(uint32_t id);
 	static bool EnableTask(uint32_t id);
 	static bool DisableTask(uint32_t id);

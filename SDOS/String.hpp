@@ -47,4 +47,4 @@ public:
 	uint8_t* GetBuffer();
 };
 
-#endif
+#endif
