@@ -27,17 +27,25 @@ extern "C"
 	void SDOS_Tick(void)
 	{
 		HAL_IncTick();
+		return;
 	}
 
 	void SDOS_Scheduler(void)
 	{
 		Scheduler::Update();
+		return;
 	}
 }
 
 Thread::Thread()
 {
-	
+	Stack = 0;
+	StackMax = 0;
+	StackMin = 0;
+	AttachedTask = 0;
+	Enabled = false;
+	Initialized = false;
+	Index = 0;
 }
 
 Thread::~Thread()
@@ -47,7 +55,21 @@ Thread::~Thread()
 
 Task::Task()
 {
-	
+	Function = 0;
+	Initialized = false;
+	Enabled = false;
+	Loop = false;
+	MemoryWarning = false;
+	Blacklisted = false;
+	LastExecute = 0;
+	NextExecute = 0;
+	ExecuteTime = 0;
+	Priority = PriorityLevel::Low;
+	AttachedThread = ThreadID::Invalid;
+	LastError = TaskError::None;
+	Quanta = 0;
+	QuantaMax = 0;
+	ReturnHandler = 0;
 }
 
 Task::~Task()
@@ -82,22 +104,62 @@ void Scheduler::Update(void)
 
 bool Scheduler::EnableThread(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+		return false;
 	
+	if (!thrd->Initialized)
+		return false;
+	
+	if (thrd->Enabled)
+		return false;
+	
+	thrd->Enabled = true;
+	
+	return true;
 }
 
 bool Scheduler::DisableThread(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+		return false;
 	
+	if (!thrd->Initialized)
+		return false;
+	
+	if (!thrd->Enabled)
+		return false;
+	
+	thrd->Enabled = false;
+	
+	return true;
 }
 
 bool Scheduler::ResetThread(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+		return false;
 	
+	if (!thrd->Initialized)
+		return false;
+	
+	thrd->Initialized = false;
+	
+	return true;
 }
 
 bool Scheduler::IsThreadEnabled(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+		return false;
 	
+	if (!thrd->Initialized)
+		return false;
+	
+	return thrd->Enabled;
 }
 
 Thread* Scheduler::GetThread(ThreadID thread)
@@ -116,6 +178,10 @@ bool Scheduler::AssignThreadID(ThreadID thread, uint32_t threadNum, void(*volati
 	ThreadAssignments[threadNum] = thread;
 	ThreadAddresses[threadNum] = (uint32_t)thrd;
 	
+	Thread* thr = GetThread(thread);
+	if (thr != 0)
+		thr->Index = threadNum;
+	
 	return true;
 }
 
@@ -133,7 +199,17 @@ Task* Scheduler::GetActiveTask(ThreadID thread)
 
 bool Scheduler::IsThreadIdle(ThreadID thread)
 {
+	Thread* thrd = GetThread(thread);
+	if (thrd == 0)
+		return true;
 	
+	if (!thrd->Initialized)
+		return true;
+	
+	if (!thrd->Enabled)
+		return true;
+	
+	return thrd->Index == _curThread;
 }
 
 uint32_t Scheduler::DetermineFrequency(PriorityLevel prio)
@@ -212,7 +288,7 @@ uint32_t Scheduler::DetermineQuanta(PriorityLevel prio)
 	}
 }
 	
-bool Scheduler::CreateTask(void(*volatile func)(void), PriorityLevel prio, uint32_t* ret_id, bool loop = false, uint32_t delayedStart = 0)
+bool Scheduler::CreateTask(int32_t(*volatile func)(void), void(*volatile retHandler)(int32_t), PriorityLevel prio, uint32_t* ret_id, bool loop, uint32_t delayedStart)
 {
 	uint32_t prim = Critical::DisableAllInterrupts();
 	uint32_t indx = 0;
@@ -236,8 +312,8 @@ bool Scheduler::CreateTask(void(*volatile func)(void), PriorityLevel prio, uint3
 			_tasks[indx].NextExecute = delayedStart + GetTick();
 			_tasks[indx].Priority = prio;
 			_tasks[indx].Quanta = 0;   //Determined within scheduler update
-			_tasks[indx].ReturnCode = 0;
-	
+			_tasks[indx].QuantaMax = 0;
+			_tasks[indx].ReturnHandler = retHandler;
 			_taskCount++;
 			*ret_id = indx;
 			Critical::EnableAllInterrupts(prim);
@@ -381,7 +457,7 @@ bool Scheduler::Initialize(void)
 		_threads[i].Enabled = false;
 		_threads[i].Stack = 0;
 		_threads[i].Initialized = false;
-		_threads[i].Index = i;
+		_threads[i].Index = 0;
 		_threads[i].StackMax = 0;
 		_threads[i].StackMin = 0;
 		ThreadAssignments[i] = ThreadID::Invalid;
@@ -403,8 +479,11 @@ bool Scheduler::Initialize(void)
 		_tasks[i].NextExecute = 0;
 		_tasks[i].Priority = PriorityLevel::SuperLow;
 		_tasks[i].Quanta = 0;
-		_tasks[i].ReturnCode = 0;
+		_tasks[i].QuantaMax = 0;
+		_tasks[i].ReturnHandler = 0;
 	}
+	
+	return true;
 }
 
 

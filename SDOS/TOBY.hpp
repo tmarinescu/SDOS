@@ -58,4 +58,5 @@ private:
 	void(*_suspectHandler)(TOBYMsg msg, uint32_t input, uint32_t expected);
 };
 
-#endif
+#endif
+

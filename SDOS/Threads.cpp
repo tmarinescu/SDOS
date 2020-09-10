@@ -3,6 +3,7 @@
 void Thread1(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -11,7 +12,12 @@ void Thread1(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -26,6 +32,7 @@ void Thread1(ThreadID thread)
 void Thread2(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -34,7 +41,12 @@ void Thread2(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -49,6 +61,7 @@ void Thread2(ThreadID thread)
 void Thread3(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -57,7 +70,12 @@ void Thread3(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -72,6 +90,7 @@ void Thread3(ThreadID thread)
 void Thread4(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -80,7 +99,12 @@ void Thread4(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -95,6 +119,7 @@ void Thread4(ThreadID thread)
 void Thread5(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -103,7 +128,12 @@ void Thread5(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -118,6 +148,7 @@ void Thread5(ThreadID thread)
 void Thread6(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -126,7 +157,12 @@ void Thread6(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -141,6 +177,7 @@ void Thread6(ThreadID thread)
 void Thread7(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -149,7 +186,12 @@ void Thread7(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
@@ -164,6 +206,7 @@ void Thread7(ThreadID thread)
 void Thread8(ThreadID thread)
 {
 	Thread* thrd = Scheduler::GetThread(thread);
+	int32_t retCode = 0;
 	while (true)
 	{
 		if (thrd->Initialized)
@@ -172,7 +215,12 @@ void Thread8(ThreadID thread)
 			{
 				if (thrd->AttachedTask->Function != 0)
 				{
-					(*thrd->AttachedTask->Function)();
+					retCode = (*thrd->AttachedTask->Function)();
+					if (thrd->AttachedTask->ReturnHandler != 0)
+					{
+						(*thrd->AttachedTask->ReturnHandler)(retCode);
+					}
+					
 					if (!thrd->AttachedTask->Loop)
 					{
 						thrd->AttachedTask->Initialized = false;
