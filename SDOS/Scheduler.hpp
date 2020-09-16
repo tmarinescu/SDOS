@@ -31,6 +31,8 @@ extern "C"
 	void SDOS_Tick(void);
 	void SDOS_Setup(void);
 	void SDOS_Scheduler(void);
+	void SDOS_Pause(void);
+	void SDOS_Resume(void);
 }
 
 enum TaskError
@@ -103,7 +105,8 @@ public:
 	volatile uint32_t* Stack;
 	volatile uint32_t StackMax;
 	volatile uint32_t StackMin;
-	Task* AttachedTask;
+	uint32_t Checksum;
+	volatile Task* AttachedTask;
 	volatile bool Enabled;
 	volatile bool Initialized;
 	uint32_t Index;
@@ -114,6 +117,7 @@ public:
 class Scheduler
 {
 private:
+	static volatile bool _running;
 	static bool _criticalTaskActive;
 	static uint32_t _stackCapture[STACK_MAX_SIZE];
 	static bool _capturedThread;
@@ -126,9 +130,12 @@ private:
 	static uint32_t _taskCount;
 	static volatile uint32_t _tick;
 	static volatile uint32_t _curThread;
+	static volatile uint32_t _taskIndex;
 	static Thread* _activeThread;
 	
 public:
+	static bool ResumeSwitching(void);
+	static bool PauseSwitching(void);
 	static uint32_t GetTick(void);
 	static void Update(void);
 	static bool EnableThread(ThreadID thread);
@@ -165,6 +172,8 @@ public:
 	
 	static bool CaptureThread(ThreadID thread);  //Backs up stack contents, only 1 thread at a time, might be useful for real-time thread analysis
 	static bool ReleaseThread(ThreadID thread);
+	
+	static uint32_t CalculateChecksum(volatile uint32_t* stackLoc, uint32_t size);
 };
 
 #endif
