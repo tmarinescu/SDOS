@@ -24,6 +24,8 @@ void Thread1(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -53,6 +55,8 @@ void Thread2(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -82,6 +86,8 @@ void Thread3(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -111,6 +117,8 @@ void Thread4(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -140,6 +148,8 @@ void Thread5(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -169,6 +179,8 @@ void Thread6(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -198,6 +210,8 @@ void Thread7(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}
@@ -227,6 +241,8 @@ void Thread8(ThreadID thread)
 					}
 					thrd->AttachedTask->AttachedThread = ThreadID::Invalid;
 				}
+				thrd->AttachedTask->LastExecute = Scheduler::GetTick();
+				thrd->AttachedTask = 0;
 			}
 		}
 	}

@@ -11,6 +11,8 @@ orgStack: .word 0
 .global SDOS_Tick
 .global SysTick_Handler
 .global SDOS_Setup
+.global SDOS_Resume
+.global SDOS_Pause
 .extern StackPtr
 
 .thumb_func

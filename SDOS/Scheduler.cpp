@@ -10,10 +10,12 @@ uint32_t Scheduler::_threadInitOffset = 0;
 uint32_t Scheduler::_taskCount = 0;
 volatile uint32_t Scheduler::_tick = 0;
 volatile uint32_t Scheduler::_curThread = 0;
+volatile uint32_t Scheduler::_taskIndex = 0;
 uint32_t Scheduler::_stackCapture[STACK_MAX_SIZE];
 Thread Scheduler::_threads[THREAD_NUM];
 Task Scheduler::_tasks[TASK_NUM];
 
+volatile bool Scheduler::_running = false;
 bool Scheduler::_criticalTaskActive = false;
 bool Scheduler::_capturedThread = false;
 ThreadID Scheduler::_capturedThreadID = ThreadID::Invalid;
@@ -32,8 +34,20 @@ extern "C"
 
 	void SDOS_Scheduler(void)
 	{
+		Scheduler::PauseSwitching();
 		Scheduler::Update();
+		Scheduler::ResumeSwitching();
 		return;
+	}
+	
+	void SDOS_Pause(void)
+	{
+		Scheduler::PauseSwitching();
+	}
+	
+	void SDOS_Resume(void)
+	{
+		Scheduler::ResumeSwitching();
 	}
 }
 
@@ -46,6 +60,7 @@ Thread::Thread()
 	Enabled = false;
 	Initialized = false;
 	Index = 0;
+	Checksum = 0;
 }
 
 Thread::~Thread()
@@ -77,6 +92,22 @@ Task::~Task()
 	
 }
 
+bool Scheduler::ResumeSwitching(void)
+{
+	if (_running)
+		return false;
+	_running = true;
+	return true;
+}
+
+bool Scheduler::PauseSwitching(void)
+{
+	if (!_running)
+		return false;
+	_running = false;
+	return true;
+}
+
 uint32_t Scheduler::GetTick(void)
 {
 	return _tick;
@@ -84,22 +115,105 @@ uint32_t Scheduler::GetTick(void)
 
 void Scheduler::Update(void)
 {
-	uint32_t prim = Critical::DisableAllInterrupts();
+	if (_running)
+		return;
+	
+	_activeThread->Checksum = CalculateChecksum(_activeThread->Stack, _activeThread->StackMax - _activeThread->StackMin);
+	
 	_curThread++;
 	if (_curThread >= THREAD_NUM)
 		_curThread = 0;
 	
+	uint32_t memThread = _curThread;
 	while (!_threads[_curThread].Enabled)
 	{
-		//Deadlock warning
 		_curThread++;
 		if (_curThread >= THREAD_NUM)
 			_curThread = 0;
+		if (memThread == _curThread)
+		{
+			//Deadlock suspected
+			while(1);
+		}
+	}
+	
+	_activeThread = &_threads[_curThread];
+	uint32_t sum = CalculateChecksum(_activeThread->Stack, _activeThread->StackMax - _activeThread->StackMin);
+	if (sum != _activeThread->Checksum)
+	{
+		//Stack changed from last time
+		while(1);
+	}
+	
+	if (_activeThread->AttachedTask == 0)
+	{
+		_taskIndex++;
+		if (_taskIndex >= TASK_NUM)
+			_taskIndex = 0;
+		bool foundTask = false;
+		uint32_t innerIndex = _taskIndex;
+		for (uint32_t i = _taskIndex; i < TASK_NUM + (_taskIndex); i++)
+		{
+			if (i < TASK_NUM)
+			{
+				innerIndex = i;
+			}
+			else
+			{
+				innerIndex = TASK_NUM - i;
+			}
+			
+			if (_tasks[innerIndex].Initialized && _tasks[innerIndex].Enabled && _tasks[innerIndex].AttachedThread == ThreadID::Invalid)
+			{
+				if (_tasks[innerIndex].Loop)
+				{
+					if (GetTick() - _tasks[innerIndex].LastExecute >= _tasks[innerIndex].ExecuteTime)
+					{
+						_tasks[innerIndex].AttachedThread = (ThreadID)_activeThread->Index;
+						_activeThread->AttachedTask = &_tasks[innerIndex];
+						foundTask = true;
+						break;
+					}
+					else
+					{
+						continue;
+					}
+				}
+				else
+				{
+					_tasks[innerIndex].AttachedThread = (ThreadID)_activeThread->Index;
+					_activeThread->AttachedTask = &_tasks[innerIndex];
+					foundTask = true;
+					break;
+				}
+			}
+		}
+		
+		if (!foundTask)
+		{
+			_curThread++;
+			if (_curThread >= THREAD_NUM)
+				_curThread = 0;
+
+			memThread = _curThread;
+			while (_threads[_curThread].AttachedTask == 0)
+			{
+				_curThread++;
+				if (_curThread >= THREAD_NUM)
+					_curThread = 0;
+				if (memThread == _curThread)
+				{
+					//Deadlock suspected
+					while(1);
+				}
+			}
+			_activeThread = &_threads[_curThread];
+		}
 	}
 	
 	StackPtr = &_threads[_curThread].Stack;
+	
 	_tick++;
-	Critical::EnableAllInterrupts(prim);
 }
 
 bool Scheduler::EnableThread(ThreadID thread)
@@ -116,6 +230,9 @@ bool Scheduler::EnableThread(ThreadID thread)
 	
 	thrd->Enabled = true;
 	
+	if (_activeThread == 0)
+		_activeThread = thrd;
+	_activeThread->Checksum = CalculateChecksum(_activeThread->Stack, _activeThread->StackMax - _activeThread->StackMin);
 	return true;
 }
 
@@ -194,7 +311,7 @@ Task* Scheduler::GetActiveTask(ThreadID thread)
 	if (!thrd->Initialized)
 		return 0;
 	
-	return thrd->AttachedTask;
+	return (Task*)thrd->AttachedTask;
 }
 
 bool Scheduler::IsThreadIdle(ThreadID thread)
@@ -460,6 +577,7 @@ bool Scheduler::Initialize(void)
 		_threads[i].Index = 0;
 		_threads[i].StackMax = 0;
 		_threads[i].StackMin = 0;
+		_threads[i].Checksum = 0;
 		ThreadAssignments[i] = ThreadID::Invalid;
 		ThreadAddresses[i] = 0;
 	}
@@ -614,4 +732,17 @@ bool Scheduler::ReleaseThread(ThreadID thread)
 	
 	Critical::EnableAllInterrupts(prim);
 	return false;
+}
+
+uint32_t Scheduler::CalculateChecksum(volatile uint32_t* stackLoc, uint32_t size)
+{
+	if (stackLoc == 0)
+		return 0;
+	
+	uint32_t sum = *stackLoc;
+	for (uint32_t i = 1; i < size; i++)
+	{
+		sum ^= *(stackLoc + i);
+	}
+	return sum;
 }
